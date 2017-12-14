@@ -25,8 +25,8 @@
 #include "kcall.h"
 #include "kdbg.h"
 #include "patch_amfid.h"
-#include "disable_protections.h"
 #include "post_exploit.h"
+#include "task_ports.h"
 
 // various prototypes and structure definitions for missing iOS headers:
 
@@ -945,7 +945,10 @@ mach_port_t go() {
         
         printf("Trying To Patch AMFID...");
         
-        do_post_exploit(tfp0);
+        mach_port_t amfid_task_port = find_task_port_for_path("/usr/libexec/amfid");
+        mach_port_mod_refs(mach_task_self(), amfid_task_port, MACH_PORT_RIGHT_SEND, 1);
+        patch_amfid(amfid_task_port);
+        
         
         // do root stuff
         
